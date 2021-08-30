@@ -7,11 +7,11 @@ class Process(
     private val states: Set<State>,
     private val rewardDiscount: Double
 ) {
-    fun calculateOptimalPolicy(): Map<State, Action?> {
+    fun calculateOptimalPolicy(): Policy {
 
         val utilities = calculateUtilities(1e-5)
 
-        return states.associateWith { it.calculateOptimalAction(rewardDiscount, given = utilities) }
+        return states.associateWith { it.calculateOptimalAction(given = utilities, rewardDiscount) }
     }
 
     private fun calculateUtilities(maxError: Double): Map<State, Double> {
@@ -25,35 +25,49 @@ class Process(
             Monitor.iterations++
 
             utilities1 = utilities2
-            utilities2 = updateUtilities(utilities1)
+            utilities2 = states.associateWith { it.calculateUtilityForOptimalAction(given = utilities1, rewardDiscount) ?: 0.0 }
 
         } while (difference(utilities1, utilities2) > maxDifference)
 
         return utilities2
     }
 
-    private fun updateUtilities(utilities: Map<State, Double>): Map<State, Double> =
-        states.associateWith { it.calculateUtility(rewardDiscount, given = utilities) ?: 0.0 }
-
-    private fun difference(utilities1: Map<State, Double>, utilities2: Map<State, Double>): Double =
+    private fun difference(utilities1: Utilities, utilities2: Utilities): Double =
         states.maxOf { state ->
             val utility1OfState = utilities1[state] ?: 0.0
             val utility2OfState = utilities2[state] ?: 0.0
             abs(utility1OfState - utility2OfState)
         }
 
-    fun estimateExpectedUtility(start: State, policy: Map<State, Action?>): Double =
-        (0..1000).map { applyPolicy(start, policy) }.average()
+    fun calculateOptimalPolicy2(): Policy {
 
-    private fun applyPolicy(start: State, policy: Map<State, Action?>, maxDepth: Int = 40): Double {
+        var policy: Policy = states.associateWith { it.randomAction() }
 
-        val action = policy[start]
+        var utilities = states.associateWith { 0.0 }
 
-        return if ((action == null) || (maxDepth == 0)) {
-            0.0
-        } else {
-            val transition = action.randomTransition()
-            transition.reward + rewardDiscount * applyPolicy(transition.state, policy, maxDepth - 1)
-        }
+        var changed: Boolean
+        do {
+            Monitor.iterations++
+
+            utilities = states.associateWith { it.calculateUtilityForPolicy(policy, given = utilities, rewardDiscount) }
+
+            changed = false
+
+            policy = policy.mapValues { (state, action) ->
+                val optimalAction = state.calculateOptimalAction(given = utilities, rewardDiscount)
+
+                changed = changed || (action != optimalAction)
+
+                optimalAction
+            }
+        } while (changed)
+
+        return policy
     }
+
+    fun simulatePolicy(start: State, policy: Policy): Double =
+        (0..1000).map { start.simulatePolicy(policy, maxDepth = 40, rewardDiscount) }.average()
 }
+
+typealias Utilities = Map<State, Double>
+typealias Policy = Map<State, Action?>

@@ -14,10 +14,17 @@ class Action(
         }
     }
 
-    fun calculateUtility(rewardDiscount: Double, given: Map<State, Double>): Double =
-        transitions.sumOf { it.calculateUtility(rewardDiscount, given) }
+    fun calculateExpectedUtility(given: Utilities, rewardDiscount: Double): Double =
+        transitions.sumOf { transition ->
+            transition.probability * transition.calculateUtility(given, rewardDiscount)
+        }
 
-    fun randomTransition(): Transition {
+    fun simulatePolicy(given: Policy, maxDepth: Int, rewardDiscount: Double): Double {
+        val transition = randomTransition()
+        return transition.simulatePolicy(given, maxDepth, rewardDiscount)
+    }
+
+    private fun randomTransition(): Transition {
         val p = Random.nextDouble()
 
         return distribution.value

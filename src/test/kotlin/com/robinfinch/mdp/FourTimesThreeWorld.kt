@@ -12,7 +12,7 @@ import org.junit.Test
 class FourTimesThreeWorld {
 
     @Test
-    fun moveToNearestGoal() {
+    fun moveToNearestGoalWithValueIteration() {
 
         // cost of being is so high that the agent moves to the
         // nearest goal
@@ -23,17 +23,50 @@ class FourTimesThreeWorld {
             rewardDiscount = 0.99
         )
 
-        val policy = mdp.calculateOptimalPolicy();
+        Monitor.reset()
+
+        val policy = mdp.calculateOptimalPolicy()
 
         Monitor.print()
 
-        assertEquals("RIGHT", policy[squares[0][0]]?.name)
         assertEquals("RIGHT", policy[squares[1][0]]?.name)
-        assertEquals("RIGHT", policy[squares[2][1]]?.name)
+        assertEquals("RIGHT", policy[squares[2][0]]?.name)
+        assertEquals("UP", policy[squares[3][0]]?.name)
+
+        val utility = mdp.simulatePolicy(squares[1][0], policy)
+
+        assertEquals(-5.6, utility, 0.2)
     }
 
     @Test
-    fun takeTheRiskyRoute() {
+    fun moveToNearestGoalWithPolicyIteration() {
+
+        // cost of being is so high that the agent moves to the
+        // nearest goal
+        val squares = setUpThreeTimesFourSquares(-1.7)
+
+        val mdp = Process(
+            states = squares.flatMap(Array<State>::toSet).toSet(),
+            rewardDiscount = 0.99
+        )
+
+        Monitor.reset()
+
+        val policy = mdp.calculateOptimalPolicy2()
+
+        Monitor.print()
+
+        assertEquals("RIGHT", policy[squares[1][0]]?.name)
+        assertEquals("RIGHT", policy[squares[2][0]]?.name)
+        assertEquals("UP", policy[squares[3][0]]?.name)
+
+        val utility = mdp.simulatePolicy(squares[1][0], policy)
+
+        assertEquals(-5.6, utility, 0.2)
+    }
+
+    @Test
+    fun riskyRouteIsBetterThanSafeRoute() {
 
         // cost of moving is high, so the agent takes the risk
         // of reaching the negative goal
@@ -44,16 +77,7 @@ class FourTimesThreeWorld {
             rewardDiscount = 0.99
         )
 
-        val policy = mdp.calculateOptimalPolicy();
-
-        Monitor.print()
-
-        assertEquals("UP", policy[squares[0][0]]?.name)
-        assertEquals("RIGHT", policy[squares[1][0]]?.name)
-
-        val expectedUtilityRiskyRoute = mdp.estimateExpectedUtility(squares[1][0], policy)
-
-        val lessOptimalPolicy = mapOf(
+        val policy = mapOf(
             squares[1][0] to squares[1][0].action("LEFT"),
             squares[0][0] to squares[0][0].action("UP"),
             squares[0][1] to squares[0][1].action("UP"),
@@ -63,13 +87,65 @@ class FourTimesThreeWorld {
             squares[2][1] to squares[2][1].action("UP")
         )
 
-        val expectedUtilitySafeRoute = mdp.estimateExpectedUtility(squares[1][0], lessOptimalPolicy)
+        val utility = mdp.simulatePolicy(squares[1][0], policy)
 
-        assertTrue(expectedUtilityRiskyRoute > expectedUtilitySafeRoute)
+        assertEquals(-3.1, utility, 0.2)
     }
 
     @Test
-    fun takeTheSafeRoute() {
+    fun takeTheRiskyRouteWithValueIteration() {
+
+        // cost of moving is high, so the agent takes the risk
+        // of reaching the negative goal
+        val squares = setUpThreeTimesFourSquares(-0.6)
+
+        val mdp = Process(
+            states = squares.flatMap(Array<State>::toSet).toSet(),
+            rewardDiscount = 0.99
+        )
+
+        val policy = mdp.calculateOptimalPolicy()
+
+        Monitor.print()
+
+        assertEquals("RIGHT", policy[squares[1][0]]?.name)
+        assertEquals("UP", policy[squares[2][0]]?.name)
+        assertEquals("UP", policy[squares[2][1]]?.name)
+        assertEquals("RIGHT", policy[squares[2][2]]?.name)
+
+        val utility = mdp.simulatePolicy(squares[1][0], policy)
+
+        assertEquals(-1.6, utility, 0.2)
+    }
+
+    @Test
+    fun takeTheRiskyRouteWithPolicyIteration() {
+
+        // cost of moving is high, so the agent takes the risk
+        // of reaching the negative goal
+        val squares = setUpThreeTimesFourSquares(-0.6)
+
+        val mdp = Process(
+            states = squares.flatMap(Array<State>::toSet).toSet(),
+            rewardDiscount = 0.99
+        )
+
+        val policy = mdp.calculateOptimalPolicy2()
+
+        Monitor.print()
+
+        assertEquals("RIGHT", policy[squares[1][0]]?.name)
+        assertEquals("UP", policy[squares[2][0]]?.name)
+        assertEquals("UP", policy[squares[2][1]]?.name)
+        assertEquals("RIGHT", policy[squares[2][2]]?.name)
+
+        val utility = mdp.simulatePolicy(squares[1][0], policy)
+
+        assertEquals(-1.6, utility, 0.2)
+    }
+
+    @Test
+    fun safeRouteIsBetterThanRiskyRoute() {
 
         // cost of moving is low, so the agent takes the safe route
         // around the water
@@ -80,16 +156,7 @@ class FourTimesThreeWorld {
             rewardDiscount = 0.99
         )
 
-        val policy = mdp.calculateOptimalPolicy();
-
-        Monitor.print()
-
-        assertEquals("UP", policy[squares[0][0]]?.name)
-        assertEquals("LEFT", policy[squares[1][0]]?.name)
-
-        val expectedUtilitySafeRoute = mdp.estimateExpectedUtility(squares[1][0], policy)
-
-        val lessOptimalPolicy = mapOf(
+        val policy = mapOf(
             squares[1][0] to squares[1][0].action("RIGHT"),
             squares[2][0] to squares[2][0].action("UP"),
             squares[3][0] to squares[3][0].action("LEFT"),
@@ -97,9 +164,66 @@ class FourTimesThreeWorld {
             squares[2][2] to squares[2][2].action("RIGHT")
         )
 
-        val expectedUtilityRiskyRoute = mdp.estimateExpectedUtility(squares[1][0], lessOptimalPolicy)
+        val utility = mdp.simulatePolicy(squares[1][0], policy)
 
-        assertTrue(expectedUtilitySafeRoute > expectedUtilityRiskyRoute)
+        assertEquals(0.6, utility, 0.2)
+    }
+
+    @Test
+    fun takeTheSafeRouteWithValueIteration() {
+
+        // cost of moving is low, so the agent takes the safe route
+        // around the water
+        val squares = setUpThreeTimesFourSquares(-0.01)
+
+        val mdp = Process(
+            states = squares.flatMap(Array<State>::toSet).toSet(),
+            rewardDiscount = 0.99
+        )
+
+        val policy = mdp.calculateOptimalPolicy()
+
+        Monitor.print()
+
+        assertEquals("LEFT", policy[squares[1][0]]?.name)
+        assertEquals("UP", policy[squares[0][0]]?.name)
+        assertEquals("UP", policy[squares[0][1]]?.name)
+        assertEquals("RIGHT", policy[squares[0][2]]?.name)
+        assertEquals("RIGHT", policy[squares[1][2]]?.name)
+        assertEquals("RIGHT", policy[squares[2][2]]?.name)
+
+        val utility = mdp.simulatePolicy(squares[1][0], policy)
+
+        assertEquals(0.9, utility, 0.2)
+    }
+
+
+    @Test
+    fun takeTheSafeRouteWithPolicyIteration() {
+
+        // cost of moving is low, so the agent takes the safe route
+        // around the water
+        val squares = setUpThreeTimesFourSquares(-0.01)
+
+        val mdp = Process(
+            states = squares.flatMap(Array<State>::toSet).toSet(),
+            rewardDiscount = 0.99
+        )
+
+        val policy = mdp.calculateOptimalPolicy2()
+
+        Monitor.print()
+
+        assertEquals("LEFT", policy[squares[1][0]]?.name)
+        assertEquals("UP", policy[squares[0][0]]?.name)
+        assertEquals("UP", policy[squares[0][1]]?.name)
+        assertEquals("RIGHT", policy[squares[0][2]]?.name)
+        assertEquals("RIGHT", policy[squares[1][2]]?.name)
+        assertEquals("RIGHT", policy[squares[2][2]]?.name)
+
+        val utility = mdp.simulatePolicy(squares[1][0], policy)
+
+        assertEquals(0.9, utility, 0.2)
     }
 
     private fun setUpThreeTimesFourSquares(rewardToMove: Double): Array<Array<State>> {
@@ -124,30 +248,30 @@ class FourTimesThreeWorld {
 
         fun up(x: Int, y: Int, probability: Double): Transition =
             if ((y + 1 == 3) || isWater(x, y + 1)) {
-                Transition(squares[x][y], probability, reward(x, y))
+                Transition(probability, reward(x, y), squares[x][y])
             } else {
-                Transition(squares[x][y + 1], probability, reward(x, y + 1))
+                Transition(probability, reward(x, y + 1), squares[x][y + 1])
             }
 
         fun right(x: Int, y: Int, probability: Double): Transition =
             if ((x + 1 == 4) || isWater(x + 1, y)) {
-                Transition(squares[x][y], probability, reward(x, y))
+                Transition(probability, reward(x, y), squares[x][y])
             } else {
-                Transition(squares[x + 1][y], probability, reward(x + 1, y))
+                Transition(probability, reward(x + 1, y), squares[x + 1][y])
             }
 
         fun down(x: Int, y: Int, probability: Double): Transition =
             if ((y - 1 == -1) || isWater(x, y - 1)) {
-                Transition(squares[x][y], probability, reward(x, y))
+                Transition(probability, reward(x, y), squares[x][y])
             } else {
-                Transition(squares[x][y - 1], probability, reward(x, y - 1))
+                Transition(probability, reward(x, y - 1), squares[x][y - 1])
             }
 
         fun left(x: Int, y: Int, probability: Double): Transition =
             if ((x - 1 == -1) || isWater(x - 1, y)) {
-                Transition(squares[x][y], probability, reward(x, y))
+                Transition(probability, reward(x, y), squares[x][y])
             } else {
-                Transition(squares[x - 1][y], probability, reward(x - 1, y))
+                Transition(probability, reward(x - 1, y), squares[x - 1][y])
             }
 
         fun up(x: Int, y: Int): Action =

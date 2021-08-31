@@ -1,9 +1,8 @@
 package com.robinfinch.mdp
 
 import com.robinfinch.mdp.monitor.Monitor
-import org.junit.Assert.assertTrue
-import org.junit.Assert.assertEquals
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
 
 /**
  * The 4x3 world example is from Russell, S., Norvig, P., 2021. Artificial Intelligence: A Modern Approach.

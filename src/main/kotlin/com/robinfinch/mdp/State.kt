@@ -14,16 +14,16 @@ data class State(
 
     fun randomAction() =
         actions.randomOrNull() // uniformly distributed
+            ?.evaluate(Double.NEGATIVE_INFINITY)
 
-    fun calculateOptimalAction(given: Utilities, rewardDiscount: Double): Action? =
-        actions.maxByOrNull { it.calculateExpectedUtility(given, rewardDiscount) }
-
-    fun calculateUtilityForOptimalAction(given: Utilities, rewardDiscount: Double): Double? =
-        actions.maxOfOrNull { it.calculateExpectedUtility(given, rewardDiscount) }
+    fun calculateOptimalAction(given: Utilities, rewardDiscount: Double): EvaluatedAction? =
+        actions
+            .map { it.evaluate(it.calculateExpectedUtility(given, rewardDiscount)) }
+            .maxByOrNull { it.utility }
 
     fun calculateUtilityForPolicy(policy: Policy, given: Utilities, rewardDiscount: Double): Double {
 
-        val action = policy[this]
+        val action = policy[this]?.action
 
         return if (action == null) {
             0.0
@@ -34,7 +34,7 @@ data class State(
 
     fun simulatePolicy(policy: Policy, maxDepth: Int, rewardDiscount: Double): Double {
 
-        val action = policy[this]
+        val action = policy[this]?.action
 
         return if ((action == null) || (maxDepth == 0)) {
             0.0

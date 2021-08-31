@@ -2,7 +2,7 @@ package com.robinfinch.mdp
 
 import kotlin.random.Random
 
-class Action(
+data class Action(
     val name: String,
     private val transitions: List<Transition>
 ) {
@@ -31,4 +31,11 @@ class Action(
             .first { (probability, _) -> p < probability }
             .let { (_, transition) -> transition }
     }
+
+    fun evaluate(utility: Double) = EvaluatedAction(this, utility)
 }
+
+data class EvaluatedAction(
+    val action: Action,
+    val utility: Double
+)

@@ -29,9 +29,9 @@ class FourTimesThreeWorld {
 
         Monitor.print()
 
-        assertEquals("RIGHT", policy[squares[1][0]]?.name)
-        assertEquals("RIGHT", policy[squares[2][0]]?.name)
-        assertEquals("UP", policy[squares[3][0]]?.name)
+        assertEquals("RIGHT", policy[squares[1][0]]?.action?.name)
+        assertEquals("RIGHT", policy[squares[2][0]]?.action?.name)
+        assertEquals("UP", policy[squares[3][0]]?.action?.name)
 
         val utility = mdp.simulatePolicy(squares[1][0], policy)
 
@@ -56,9 +56,9 @@ class FourTimesThreeWorld {
 
         Monitor.print()
 
-        assertEquals("RIGHT", policy[squares[1][0]]?.name)
-        assertEquals("RIGHT", policy[squares[2][0]]?.name)
-        assertEquals("UP", policy[squares[3][0]]?.name)
+        assertEquals("RIGHT", policy[squares[1][0]]?.action?.name)
+        assertEquals("RIGHT", policy[squares[2][0]]?.action?.name)
+        assertEquals("UP", policy[squares[3][0]]?.action?.name)
 
         val utility = mdp.simulatePolicy(squares[1][0], policy)
 
@@ -78,13 +78,13 @@ class FourTimesThreeWorld {
         )
 
         val policy = mapOf(
-            squares[1][0] to squares[1][0].action("LEFT"),
-            squares[0][0] to squares[0][0].action("UP"),
-            squares[0][1] to squares[0][1].action("UP"),
-            squares[0][2] to squares[0][2].action("RIGHT"),
-            squares[1][2] to squares[1][2].action("RIGHT"),
-            squares[2][2] to squares[2][2].action("RIGHT"),
-            squares[2][1] to squares[2][1].action("UP")
+            squares[1][0] act "LEFT",
+            squares[0][0] act "UP",
+            squares[0][1] act "UP",
+            squares[0][2] act "RIGHT",
+            squares[1][2] act "RIGHT",
+            squares[2][2] act "RIGHT",
+            squares[2][1] act "UP"
         )
 
         val utility = mdp.simulatePolicy(squares[1][0], policy)
@@ -104,14 +104,16 @@ class FourTimesThreeWorld {
             rewardDiscount = 0.99
         )
 
+        Monitor.reset()
+
         val policy = mdp.calculateOptimalPolicy()
 
         Monitor.print()
 
-        assertEquals("RIGHT", policy[squares[1][0]]?.name)
-        assertEquals("UP", policy[squares[2][0]]?.name)
-        assertEquals("UP", policy[squares[2][1]]?.name)
-        assertEquals("RIGHT", policy[squares[2][2]]?.name)
+        assertEquals("RIGHT", policy[squares[1][0]]?.action?.name)
+        assertEquals("UP", policy[squares[2][0]]?.action?.name)
+        assertEquals("UP", policy[squares[2][1]]?.action?.name)
+        assertEquals("RIGHT", policy[squares[2][2]]?.action?.name)
 
         val utility = mdp.simulatePolicy(squares[1][0], policy)
 
@@ -130,14 +132,16 @@ class FourTimesThreeWorld {
             rewardDiscount = 0.99
         )
 
+        Monitor.reset()
+
         val policy = mdp.calculateOptimalPolicy2()
 
         Monitor.print()
 
-        assertEquals("RIGHT", policy[squares[1][0]]?.name)
-        assertEquals("UP", policy[squares[2][0]]?.name)
-        assertEquals("UP", policy[squares[2][1]]?.name)
-        assertEquals("RIGHT", policy[squares[2][2]]?.name)
+        assertEquals("RIGHT", policy[squares[1][0]]?.action?.name)
+        assertEquals("UP", policy[squares[2][0]]?.action?.name)
+        assertEquals("UP", policy[squares[2][1]]?.action?.name)
+        assertEquals("RIGHT", policy[squares[2][2]]?.action?.name)
 
         val utility = mdp.simulatePolicy(squares[1][0], policy)
 
@@ -157,11 +161,11 @@ class FourTimesThreeWorld {
         )
 
         val policy = mapOf(
-            squares[1][0] to squares[1][0].action("RIGHT"),
-            squares[2][0] to squares[2][0].action("UP"),
-            squares[3][0] to squares[3][0].action("LEFT"),
-            squares[2][1] to squares[2][1].action("UP"),
-            squares[2][2] to squares[2][2].action("RIGHT")
+            squares[1][0] act "RIGHT",
+            squares[2][0] act "UP",
+            squares[3][0] act "LEFT",
+            squares[2][1] act "UP",
+            squares[2][2] act "RIGHT"
         )
 
         val utility = mdp.simulatePolicy(squares[1][0], policy)
@@ -181,22 +185,23 @@ class FourTimesThreeWorld {
             rewardDiscount = 0.99
         )
 
+        Monitor.reset()
+
         val policy = mdp.calculateOptimalPolicy()
 
         Monitor.print()
 
-        assertEquals("LEFT", policy[squares[1][0]]?.name)
-        assertEquals("UP", policy[squares[0][0]]?.name)
-        assertEquals("UP", policy[squares[0][1]]?.name)
-        assertEquals("RIGHT", policy[squares[0][2]]?.name)
-        assertEquals("RIGHT", policy[squares[1][2]]?.name)
-        assertEquals("RIGHT", policy[squares[2][2]]?.name)
+        assertEquals("LEFT", policy[squares[1][0]]?.action?.name)
+        assertEquals("UP", policy[squares[0][0]]?.action?.name)
+        assertEquals("UP", policy[squares[0][1]]?.action?.name)
+        assertEquals("RIGHT", policy[squares[0][2]]?.action?.name)
+        assertEquals("RIGHT", policy[squares[1][2]]?.action?.name)
+        assertEquals("RIGHT", policy[squares[2][2]]?.action?.name)
 
         val utility = mdp.simulatePolicy(squares[1][0], policy)
 
         assertEquals(0.9, utility, 0.2)
     }
-
 
     @Test
     fun takeTheSafeRouteWithPolicyIteration() {
@@ -210,16 +215,18 @@ class FourTimesThreeWorld {
             rewardDiscount = 0.99
         )
 
+        Monitor.reset()
+
         val policy = mdp.calculateOptimalPolicy2()
 
         Monitor.print()
 
-        assertEquals("LEFT", policy[squares[1][0]]?.name)
-        assertEquals("UP", policy[squares[0][0]]?.name)
-        assertEquals("UP", policy[squares[0][1]]?.name)
-        assertEquals("RIGHT", policy[squares[0][2]]?.name)
-        assertEquals("RIGHT", policy[squares[1][2]]?.name)
-        assertEquals("RIGHT", policy[squares[2][2]]?.name)
+        assertEquals("LEFT", policy[squares[1][0]]?.action?.name)
+        assertEquals("UP", policy[squares[0][0]]?.action?.name)
+        assertEquals("UP", policy[squares[0][1]]?.action?.name)
+        assertEquals("RIGHT", policy[squares[0][2]]?.action?.name)
+        assertEquals("RIGHT", policy[squares[1][2]]?.action?.name)
+        assertEquals("RIGHT", policy[squares[2][2]]?.action?.name)
 
         val utility = mdp.simulatePolicy(squares[1][0], policy)
 
@@ -329,4 +336,7 @@ class FourTimesThreeWorld {
 
         return squares
     }
+
+    private infix fun State.act(name: String) =
+        this to this.action(name)?.evaluate(0.0)
 }

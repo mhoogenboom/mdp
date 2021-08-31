@@ -25,7 +25,7 @@ class Process(
             Monitor.iterations++
 
             utilities1 = utilities2
-            utilities2 = states.associateWith { it.calculateUtilityForOptimalAction(given = utilities1, rewardDiscount) ?: 0.0 }
+            utilities2 = states.associateWith { it.calculateOptimalAction(given = utilities1, rewardDiscount)?.utility ?: 0.0 }
 
         } while (difference(utilities1, utilities2) > maxDifference)
 
@@ -56,7 +56,7 @@ class Process(
             policy = policy.mapValues { (state, action) ->
                 val optimalAction = state.calculateOptimalAction(given = utilities, rewardDiscount)
 
-                changed = changed || (action != optimalAction)
+                changed = changed || optimalAction.isBetterThan(action)
 
                 optimalAction
             }
@@ -65,9 +65,12 @@ class Process(
         return policy
     }
 
+    private fun EvaluatedAction?.isBetterThan(that: EvaluatedAction?) =
+        (this != null) && (that == null || this.utility - that.utility > 1e-05)
+
     fun simulatePolicy(start: State, policy: Policy): Double =
         (0..1000).map { start.simulatePolicy(policy, maxDepth = 40, rewardDiscount) }.average()
 }
 
 typealias Utilities = Map<State, Double>
-typealias Policy = Map<State, Action?>
+typealias Policy = Map<State, EvaluatedAction?>
